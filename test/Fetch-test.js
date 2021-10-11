@@ -26,11 +26,10 @@ const UniswapV2Pair = artifacts.require('./UniswapV2Pair.sol')
 const WETH = artifacts.require('./WETH9.sol')
 const TOKEN = artifacts.require('./Token.sol')
 const Stake = artifacts.require('./Stake.sol')
+const Sale = artifacts.require('./Sale.sol')
 const Fetch = artifacts.require('./Fetch.sol')
 const NFT = artifacts.require('./NFT.sol')
 
-
-const Beneficiary = "0x6ffFe11A5440fb275F30e0337Fc296f938a287a5"
 
 let pancakeFactory,
     pancakeRouter,
@@ -40,6 +39,7 @@ let pancakeFactory,
     pancakePairAddress,
     stake,
     fetch,
+    sale,
     nft
 
 
@@ -82,12 +82,19 @@ contract('Fetch-test', function([userOne, userTwo, userThree]) {
       userOne
     )
 
+    sale = await Sale.new(
+      token.address,
+      userOne,
+      pancakeRouter.address
+    )
+
     fetch = await Fetch.new(
       weth.address,
       pancakeRouter.address,
       stake.address,
       token.address,
       pair.address,
+      sale.address
     )
 
     // add some rewards to claim stake

@@ -1,13 +1,15 @@
 pragma solidity ^0.6.2;
 
-import "./interfaces/IUniswapV2Router02.sol";
-import "./interfaces/IWETH.sol";
-import "./interfaces/ISale.sol";
-import "./interfaces/IStake.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+
+import "./interfaces/IUniswapV2Router02.sol";
+import "./interfaces/IWETH.sol";
+import "./interfaces/ISale.sol";
+import "./interfaces/IStake.sol";
+import "./interfaces/ISale.sol";
 
 
 contract Fetch is Ownable {
@@ -23,6 +25,8 @@ contract Fetch is Ownable {
   address public uniPair;
   address public tokenSale;
 
+  ISale public sale;
+
   /**
   * @dev constructor
   *
@@ -35,7 +39,8 @@ contract Fetch is Ownable {
     address _pancakeRouter,
     address _stake,
     address _token,
-    address _uniPair
+    address _uniPair,
+    address _sale
     )
     public
   {
@@ -44,6 +49,7 @@ contract Fetch is Ownable {
     stake = _stake;
     token = _token;
     uniPair = _uniPair;
+    sale = ISale(_sale);
   }
 
   // deposit only ETH
