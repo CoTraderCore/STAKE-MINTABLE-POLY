@@ -365,6 +365,28 @@ contract('Fetch-test', function([userOne, userTwo, userThree]) {
       assert.notEqual(Number(await stake.balanceOf(userTwo)), 0)
     })
 
+    it('Sale should mint new tokens and send ETH to receiver after user deposit in fetch', async function() {
+      const beneficiaryETHBalanceBefore = Number(await web3.eth.getBalance(userOne))
+      const totalUpplyBefore = Number(await token.totalSupply())
+
+      // deposit
+      await fetch.deposit({ from:userTwo, value:toWei(String(1)) })
+
+      // receiver receive ETH
+      assert.isTrue(
+        Number(await web3.eth.getBalance(userOne))
+        >
+        beneficiaryETHBalanceBefore
+      )
+
+      // sale mint new tokens 
+      assert.isTrue(
+        Number(await token.totalSupply())
+        >
+        totalUpplyBefore
+      )
+    })
+
     it('User can withdraw converted pool via fetch from vault', async function() {
       // user not hold any pool
       assert.equal(Number(await pair.balanceOf(userTwo)), 0)
