@@ -17,13 +17,16 @@ contract Fetch is Ownable {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
   address public WETH;
-  address public pancakeRouter;
+  address public dexRouter;
 
   address public stake;
 
   address public token;
   address public uniPair;
   address public tokenSale;
+
+  uint256 public dexSplit = 50;
+  uint256 public saleSplit = 50;
 
   ISale public sale;
 
@@ -36,7 +39,7 @@ contract Fetch is Ownable {
   */
   constructor(
     address _WETH,
-    address _pancakeRouter,
+    address _dexRouter,
     address _stake,
     address _token,
     address _uniPair,
@@ -45,7 +48,7 @@ contract Fetch is Ownable {
     public
   {
     WETH = _WETH;
-    pancakeRouter = _pancakeRouter;
+    dexRouter = _dexRouter;
     stake = _stake;
     token = _token;
     uniPair = _uniPair;
@@ -95,11 +98,11 @@ contract Fetch is Ownable {
     IWETH(WETH).deposit.value(ethBalance)();
 
     // approve tokens to router
-    IERC20(token).approve(pancakeRouter, tokenReceived);
-    IERC20(WETH).approve(pancakeRouter, ethBalance);
+    IERC20(token).approve(dexRouter, tokenReceived);
+    IERC20(WETH).approve(dexRouter, ethBalance);
 
     // add LD
-    IUniswapV2Router02(pancakeRouter).addLiquidity(
+    IUniswapV2Router02(dexRouter).addLiquidity(
         WETH,
         token,
         ethBalance,
@@ -121,6 +124,24 @@ contract Fetch is Ownable {
     sendRemains(stakeAddress, receiver);
   }
 
+  /**
+  * @dev swap ETH to token via DEX and Sale
+  */
+  function swapETHInput(uint256 input) internal {
+    // determining the portion of the incoming ETH to be converted to the ERC20 Token
+    uint256 conversionPortion = input.mul(505).div(1000);
+
+    (uint256 ethToDex,
+     uint256 ethToSale) = calculateToSplit(conversionPortion);
+
+    // SPLIT SALE with DEX and SALE
+    if(ethToDex > 0)
+      swapETHViaDEX(dexRouter, ethToDex);
+
+    if(ethToSale > 0)
+      sale.buy.value(ethToSale)();
+  }
+
 
  /**
  * @dev send remains back to user
@@ -139,15 +160,6 @@ contract Fetch is Ownable {
        payable(receiver).transfer(ethRemains);
  }
 
- /**
- * @dev swap ETH to token via DEX and Sale
- */
- function swapETHInput(uint256 input) internal {
-   // determining the portion of the incoming ETH to be converted to the ERC20 Token
-   uint256 conversionPortion = input.mul(505).div(1000);
-   swapETHViaDEX(pancakeRouter, conversionPortion);
- }
-
  // helper for swap via dex
  function swapETHViaDEX(address routerDEX, uint256 amount) internal {
    // SWAP split % of ETH input to token from pool
@@ -163,4 +175,32 @@ contract Fetch is Ownable {
    );
  }
 
+ /**
+ * @dev return split % amount of input
+ */
+ function calculateToSplit(uint256 ethInput)
+   public
+   view
+   returns(uint256 ethToDex, uint256 ethToSale)
+ {
+   ethToDex = ethInput.div(100).mul(dexSplit);
+   ethToSale = ethInput.div(100).mul(saleSplit);
+ }
+
+ /**
+ * @dev allow owner set new split
+ */
+ function updateSplit(
+   uint256 _dexSplit,
+   uint256 _saleSplit
+ )
+   external
+   onlyOwner
+ {
+   uint256 totalPercentage = _dexSplit + _saleSplit;
+   require(totalPercentage == 100, "wrong total split");
+
+   dexSplit = _dexSplit;
+   saleSplit = _saleSplit;
+ }
 }

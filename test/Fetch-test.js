@@ -109,6 +109,9 @@ contract('Fetch-test', function([userOne, userTwo, userThree]) {
 
     // transfer ownership from nft to stake
     await nft.transferOwnership(stake.address)
+
+    // make sale owner of token
+    await token.transferOwnership(sale.address)
   }
 
   beforeEach(async function() {

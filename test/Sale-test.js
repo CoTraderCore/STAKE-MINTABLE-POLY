@@ -29,7 +29,6 @@ const url = "https://gateway.pinata.cloud/ipfs/QmNVZdcfwaadBzKkDFfGXtqNdKwEbMsQY
 const nftType = ".json"
 const NFTPrice = toWei("1")
 
-const Beneficiary = "0x6ffFe11A5440fb275F30e0337Fc296f938a287a5"
 
 let uniswapV2Factory,
     uniswapV2Router,
@@ -82,7 +81,7 @@ contract('Sale-test', function([userOne, userTwo, userThree]) {
 
     sale = await Sale.new(
       token.address,
-      Beneficiary,
+      userOne,
       uniswapV2Router.address
     )
 
@@ -115,7 +114,7 @@ contract('Sale-test', function([userOne, userTwo, userThree]) {
   describe('INIT Sale', function() {
     it('Correct init token sale', async function() {
       assert.equal(await sale.token(), token.address)
-      assert.equal(await sale.beneficiary(), Beneficiary)
+      assert.equal(await sale.beneficiary(), userOne)
       assert.equal(await sale.Router(), uniswapV2Router.address)
     })
   })
@@ -152,6 +151,22 @@ contract('Sale-test', function([userOne, userTwo, userThree]) {
       await sale.buy({ from:userTwo, value:toWei(String(1)) })
       assert.isTrue(
         await token.balanceOf(userTwo) > tokenBalanceBefore
+      )
+    })
+
+
+    it('Beneficiary receive ETH', async function() {
+      const beneficiaryETHBalanceBefore = Number(await web3.eth.getBalance(userOne))
+
+      await sale.sendTransaction({
+        value: toWei(String(1)),
+        from:userTwo
+      })
+
+      assert.isTrue(
+        Number(await web3.eth.getBalance(userOne))
+        >
+        beneficiaryETHBalanceBefore
       )
     })
 
