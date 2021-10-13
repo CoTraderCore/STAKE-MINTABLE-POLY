@@ -120,7 +120,7 @@ contract Fetch is Ownable {
     IStake(stakeAddress).stakeFor(poolReceived, receiver);
 
     // send remains and shares back to users
-    sendRemains(stakeAddress, receiver);
+    sendRemains(receiver);
   }
 
   /**
@@ -145,7 +145,7 @@ contract Fetch is Ownable {
  /**
  * @dev send remains back to user
  */
- function sendRemains(address stakeAddress, address receiver) internal {
+ function sendRemains(address receiver) internal {
     uint256 tokenRemains = IERC20(token).balanceOf(address(this));
     if(tokenRemains > 0)
        IERC20(token).transfer(receiver, tokenRemains);
