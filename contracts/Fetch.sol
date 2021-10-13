@@ -23,7 +23,6 @@ contract Fetch is Ownable {
 
   address public token;
   address public uniPair;
-  address public tokenSale;
 
   uint256 public dexSplit = 50;
   uint256 public saleSplit = 50;
