@@ -112,8 +112,11 @@ contract Fetch is Ownable {
         now + 1800
     );
 
-    // approve pool to stake
+    // check pool received
     uint256 poolReceived = IERC20(uniPair).balanceOf(address(this));
+    require(poolReceived > 0, "ZERRO POOL OUTPUT");
+
+    // approve pool to stake
     IERC20(uniPair).approve(stakeAddress, poolReceived);
 
     // deposit received pool in token vault strategy
