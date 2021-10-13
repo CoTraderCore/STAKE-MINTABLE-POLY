@@ -379,7 +379,7 @@ contract('Fetch-test', function([userOne, userTwo, userThree]) {
         beneficiaryETHBalanceBefore
       )
 
-      // sale mint new tokens 
+      // sale mint new tokens
       assert.isTrue(
         Number(await token.totalSupply())
         >
